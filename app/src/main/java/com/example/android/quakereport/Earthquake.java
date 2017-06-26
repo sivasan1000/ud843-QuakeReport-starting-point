@@ -9,7 +9,7 @@ import java.util.Date;
 public class Earthquake {
 
     /**
-     * Earthquake information: magnitude / location / date / time
+     * Earthquake information: magnitude / location / date / time / website url
      */
     private double mMagnitude;
     private String mLocation;

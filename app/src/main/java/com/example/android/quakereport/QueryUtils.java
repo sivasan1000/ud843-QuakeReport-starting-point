@@ -19,14 +19,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
-
-import static android.R.attr.data;
-import static com.example.android.quakereport.EarthquakeActivity.LOG_TAG;
-import static com.example.android.quakereport.R.id.magnitude;
 
 
 /**
@@ -38,6 +32,11 @@ public final class QueryUtils {
     /** Tag for the log messages */
     public static final String LOG_TAG = QueryUtils.class.getSimpleName();
 
+    /**
+     * Create a private constructor because no one should ever create a {@link QueryUtils} object.
+     * This class is only meant to hold static variables and methods, which can be accessed
+     * directly from the class name QueryUtils (and an object instance of QueryUtils is not needed).
+     */
     private QueryUtils() {
     }
 //    /**
@@ -58,6 +57,9 @@ public final class QueryUtils {
      * Query the USGS dataset and return an {@link Earthquake} object list representing last 10 earthquakes.
      */
     public static List<Earthquake> fetchEarthquakeData(String requestUrl) {
+
+        Log.i(LOG_TAG, "TEST: fetchEarthquakeData() called");
+
         // Create URL object
         URL url = createUrl(requestUrl);
 
@@ -124,6 +126,9 @@ public final class QueryUtils {
                 urlConnection.disconnect();
             }
             if (inputStream != null) {
+                // Closing the input stream could throw an IOException, which is why
+                // the makeHttpRequest(URL url) method signature specifies than an IOException
+                // could be thrown.
                 inputStream.close();
             }
         }
