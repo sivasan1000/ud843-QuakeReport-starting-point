@@ -56,10 +56,17 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
      */
     private EarthquakeAdapter mAdapter;
 
+    /**
+     * TextView that is displayed when the list is empty
+     */
+    private TextView mEmptyStateTextView;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        Log.i(LOG_TAG, "TEST: Earthquake Activity onCreate() called");
+        // Log test for onCreate()
+        //Log.i(LOG_TAG, "TEST: Earthquake Activity onCreate() called");
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.earthquake_activity);
@@ -71,6 +78,12 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
 
         // Find a reference to the {@link ListView} in the layout
         ListView earthquakeListView = (ListView) findViewById(R.id.list);
+
+
+        // Set the Empty State
+        mEmptyStateTextView = (TextView) findViewById(R.id.empty_view);
+        earthquakeListView.setEmptyView(mEmptyStateTextView);
+
 
         // Create a new adapter that takes an empty list of earthquakes as input
         mAdapter = new EarthquakeAdapter(this, new ArrayList<Earthquake>());
@@ -98,18 +111,50 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
             }
         });
 
-//        // Start the AsyncTask to fetch the earthquake data
-//        EarthquakeAsyncTask task = new EarthquakeAsyncTask();
-//        task.execute(USGS_REQUEST_URL);
 
-        // Get a reference to the LoaderManager, in order to interact with loaders.
-        LoaderManager loaderManager = getLoaderManager();
+////        Old - 2017-06-27_21:32
+////        // Start the AsyncTask to fetch the earthquake data
+////        EarthquakeAsyncTask task = new EarthquakeAsyncTask();
+////        task.execute(USGS_REQUEST_URL);
+//
+//        // Get a reference to the LoaderManager, in order to interact with loaders.
+//        LoaderManager loaderManager = getLoaderManager();
+//
+//        // Initialize the loader. Pass in the int ID constant defined above and pass in null for
+//        // the bundle. Pass in this activity for the LoaderCallbacks parameter (which is valid
+//        // because this activity implements the LoaderCallbacks interface).
+//
+//        // Log test for initLoader()
+//        //Log.i(LOG_TAG, "TEST: initLoader() is called");
+//        loaderManager.initLoader(EARTHQUAKE_LOADER_ID, null, this);
 
-        // Initialize the loader. Pass in the int ID constant defined above and pass in null for
-        // the bundle. Pass in this activity for the LoaderCallbacks parameter (which is valid
-        // because this activity implements the LoaderCallbacks interface).
-        Log.i(LOG_TAG, "TEST: initLoader() is called");
-        loaderManager.initLoader(EARTHQUAKE_LOADER_ID, null, this);
+        //        New - 2017-06-27_21:40
+
+// Get a reference to the ConnectivityManager to check state of network connectivity
+        ConnectivityManager connMgr = (ConnectivityManager)
+                getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        // Get details on the currently active default data network
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+
+        // If there is a network connection, fetch data
+        if (networkInfo != null && networkInfo.isConnected()) {
+            // Get a reference to the LoaderManager, in order to interact with loaders.
+            LoaderManager loaderManager = getLoaderManager();
+
+            // Initialize the loader. Pass in the int ID constant defined above and pass in null for
+            // the bundle. Pass in this activity for the LoaderCallbacks parameter (which is valid
+            // because this activity implements the LoaderCallbacks interface).
+            loaderManager.initLoader(EARTHQUAKE_LOADER_ID, null, this);
+        } else {
+            // Otherwise, display error
+            // First, hide loading indicator so error message will be visible
+            View loadingIndicator = findViewById(R.id.loading_indicator);
+            loadingIndicator.setVisibility(View.GONE);
+
+            // Update empty state with no connection error message
+            mEmptyStateTextView.setText(R.string.no_internet_connection);
+        }
     }
 
 //    /**
@@ -168,7 +213,8 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
     @Override
     public Loader<List<Earthquake>> onCreateLoader(int i, Bundle bundle) {
 
-        Log.i(LOG_TAG, "TEST: onCreateLoader() called");
+        // Log test for onCreateLoader()
+        //Log.i(LOG_TAG, "TEST: onCreateLoader() called");
 
         // Create a new loader for the given URL
         return new EarthquakeLoader(this, USGS_REQUEST_URL);
@@ -177,7 +223,15 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
     @Override
     public void onLoadFinished(Loader<List<Earthquake>> loader, List<Earthquake> earthquakes) {
 
-        Log.i(LOG_TAG, "TEST: oLoadFinished() called");
+        // Log test for oLoadFinished()
+        //Log.i(LOG_TAG, "TEST: oLoadFinished() called");
+
+        // Hide loading indicator because the data has been loaded
+        View loadingIndicator = findViewById(R.id.loading_indicator);
+        loadingIndicator.setVisibility(View.GONE);
+
+        // Set empty state text to display "No earthquakes found."
+        mEmptyStateTextView.setText(R.string.no_earthquakes);
 
         // Clear the adapter of previous earthquake data
         mAdapter.clear();
@@ -192,7 +246,8 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
     @Override
     public void onLoaderReset(Loader<List<Earthquake>> loader) {
 
-        Log.i(LOG_TAG, "TEST: oLoaderReset() called");
+        // Log test for oLoaderReset()
+        //Log.i(LOG_TAG, "TEST: oLoaderReset() called");
 
         // Loader reset, so we can clear out our existing data.
         mAdapter.clear();
